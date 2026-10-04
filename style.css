@@ -62,6 +62,9 @@ section.settings input[type="checkbox"]:checked + label {
   color: white;
   background: #0088ff;
 }
+.contractions {
+  margin-bottom: 1em;
+}
 .presets {
   margin-bottom: 1em;
 }

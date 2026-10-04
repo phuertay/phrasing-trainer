@@ -106,90 +106,125 @@ const fullStarters = [
   { stroke: "STWR", word: "", form: "are", person: "b3pp" },
 ];
 
-// Alternate STRUCTURE_EXCEPTIONS from jeff-phrasing when contractions are enabled.
+// jeff-phrasing STRUCTURE_EXCEPTIONS for empty-middle be/have forms.
 // `!` is replaced with the starter word. `_` is the default/fallback person.
-const structureContractions = {
-  E: {
-    present: {
-      _: "! are",
-      "1ps": "!'m",
-      "2p": "!'re",
-      "3ps": "!'s",
-      b3ps: "! is",
-      "1pp": "!'re",
-      "3pp": "!'re",
-      b3pp: "! are",
+// "contracted" matches the optional I'm/I've block; "plain" is the default.
+const structureExceptions = {
+  plain: {
+    E: {
+      present: { _: "! are", "1ps": "! am", "3ps": "! is" },
+      past: { _: "! were", "1ps": "! was", "3ps": "! was" },
+      verb: "being",
     },
-    past: { _: "! were", "1ps": "! was", "3ps": "! was" },
-    verb: "being",
+    "*E": {
+      present: { _: "! aren't", "1ps": "! am not", "3ps": "! isn't" },
+      past: { _: "! weren't", "1ps": "! wasn't", "3ps": "! wasn't" },
+      verb: "being",
+    },
+    F: {
+      present: { _: "! have", "3ps": "! has" },
+      past: "! had",
+      verb: "been",
+    },
+    "*F": {
+      present: { _: "! haven't", "3ps": "! hasn't" },
+      past: "! hadn't",
+      verb: "been",
+    },
+    EF: {
+      present: { _: "! have been", "3ps": "! has been" },
+      past: "! had been",
+      verb: "being",
+    },
+    "*EF": {
+      present: { _: "! haven't been", "3ps": "! hasn't been" },
+      past: "! hadn't been",
+      verb: "being",
+    },
   },
-  "*E": {
-    present: {
-      _: "! are not",
-      "1ps": "!'m not",
-      "2p": "!'re not",
-      "3ps": "! isn't",
-      "1pp": "!'re not",
-      "3pp": "!'re not",
-      b3pp: "! are not",
+  contracted: {
+    E: {
+      present: {
+        _: "! are",
+        "1ps": "!'m",
+        "2p": "!'re",
+        "3ps": "!'s",
+        b3ps: "! is",
+        "1pp": "!'re",
+        "3pp": "!'re",
+        b3pp: "! are",
+      },
+      past: { _: "! were", "1ps": "! was", "3ps": "! was" },
+      verb: "being",
     },
-    past: { _: "! weren't", "1ps": "! wasn't", "3ps": "! wasn't" },
-    verb: "being",
-  },
-  F: {
-    present: {
-      _: "! have",
-      "1ps": "!'ve",
-      "2p": "!'ve",
-      "3ps": "!'s",
-      b3ps: "! has",
-      "1pp": "!'ve",
-      "3pp": "!'ve",
-      b3pp: "! have",
+    "*E": {
+      present: {
+        _: "! are not",
+        "1ps": "!'m not",
+        "2p": "!'re not",
+        "3ps": "! isn't",
+        "1pp": "!'re not",
+        "3pp": "!'re not",
+        b3pp: "! are not",
+      },
+      past: { _: "! weren't", "1ps": "! wasn't", "3ps": "! wasn't" },
+      verb: "being",
     },
-    past: {
-      _: "! had",
-      "1ps": "!'d",
-      "2p": "!'d",
-      "3ps": "!'d",
-      "1pp": "!'d",
-      "3pp": "!'d",
-      b3pp: "! had",
+    F: {
+      present: {
+        _: "! have",
+        "1ps": "!'ve",
+        "2p": "!'ve",
+        "3ps": "!'s",
+        b3ps: "! has",
+        "1pp": "!'ve",
+        "3pp": "!'ve",
+        b3pp: "! have",
+      },
+      past: {
+        _: "! had",
+        "1ps": "!'d",
+        "2p": "!'d",
+        "3ps": "!'d",
+        "1pp": "!'d",
+        "3pp": "!'d",
+        b3pp: "! had",
+      },
+      verb: "been",
     },
-    verb: "been",
-  },
-  "*F": {
-    present: { _: "! haven't", "3ps": "! hasn't" },
-    past: "! hadn't",
-    verb: "been",
-  },
-  EF: {
-    present: {
-      _: "! have been",
-      "1ps": "!'ve been",
-      "2p": "!'ve been",
-      "3ps": "!'s been",
-      b3ps: "! has been",
-      "1pp": "!'ve been",
-      "3pp": "!'ve been",
-      b3pp: "! have been",
+    "*F": {
+      present: { _: "! haven't", "3ps": "! hasn't" },
+      past: "! hadn't",
+      verb: "been",
     },
-    past: {
-      _: "! had been",
-      "1ps": "!'d been",
-      "2p": "!'d been",
-      "3ps": "!'d been",
-      b3ps: "! had been",
-      "1pp": "!'d been",
-      "3pp": "!'d been",
-      b3pp: "! had been",
+    EF: {
+      present: {
+        _: "! have been",
+        "1ps": "!'ve been",
+        "2p": "!'ve been",
+        "3ps": "!'s been",
+        b3ps: "! has been",
+        "1pp": "!'ve been",
+        "3pp": "!'ve been",
+        b3pp: "! have been",
+      },
+      past: {
+        _: "! had been",
+        "1ps": "!'d been",
+        "2p": "!'d been",
+        "3ps": "!'d been",
+        b3ps: "! had been",
+        "1pp": "!'d been",
+        "3pp": "!'d been",
+        b3pp: "! had been",
+      },
+      verb: "being",
     },
-    verb: "being",
-  },
-  "*EF": {
-    present: { _: "! haven't been", "3ps": "! hasn't been" },
-    past: "! hadn't been",
-    verb: "being",
+    "*EF": {
+      present: { _: "! haven't been", "3ps": "! hasn't been" },
+      past: "! hadn't been",
+      verb: "being",
+    },
   },
 };
 
@@ -339,15 +374,17 @@ function makeFull(starter, aux, structure, verb, past, hasSuffix, useContraction
     verbStroke(verb, past, hasSuffix)
   ).replace(/(?<=[AO])-|-(?=[*EU])/, "");
 
-  // jeff-phrasing contracted STRUCTURE_EXCEPTIONS (empty middle only).
-  const contraction = useContractions && !aux.stroke && structureContractions[structure.stroke];
-  if (contraction) {
+  // Empty-middle be/have forms always go through STRUCTURE_EXCEPTIONS so
+  // contracted vs plain never mix (I'm ↔ I am, I've ↔ I have, …).
+  const exceptions = structureExceptions[useContractions ? "contracted" : "plain"];
+  const exception = !aux.stroke && exceptions[structure.stroke];
+  if (exception) {
     const tense = past ? "past" : "present";
-    const phrase = personLookup(contraction[tense], starter.person).replaceAll(
+    const phrase = personLookup(exception[tense], starter.person).replaceAll(
       "!",
       starter.word
     );
-    const vp = conjugate(verb, contraction.verb, false, false);
+    const vp = conjugate(verb, exception.verb, false, false);
     return [stroke, phrase + " " + vp];
   }
 
@@ -448,7 +485,7 @@ function generatePrompt() {
     return ["", "(No phrases available.)"];
   }
   const isFull = simple && full ? coin() : full;
-  const useContractions = on("o-contractions");
+  const useContractions = !!document.querySelector("#c-on:checked");
   const [stroke, phrase] = isFull
     ? makeFull(pick(fs), pick(fa), pick(fst), pick(v), past, suffix, useContractions)
     : makeSimple(pick(ss), pick(sp), have, pick(v), past, suffix);
@@ -542,6 +579,9 @@ for (const i of [...document.querySelectorAll("input")]) {
   });
 }
 
-for (const name of ["o-contractions", "s-have", "v-suffix", "v-past"]) {
+for (const name of ["s-have", "v-suffix", "v-past"]) {
   document.getElementsByName(name)[0]?.addEventListener("change", nextPrompt);
+}
+for (const el of document.querySelectorAll('input[name="contractions"]')) {
+  el.addEventListener("change", nextPrompt);
 }
