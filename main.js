@@ -273,12 +273,6 @@ function personLookup(data, person) {
   return data._;
 }
 
-function contractModalHave(phrase) {
-  return phrase
-    .replace(/\bhave been\b/g, "'ve been")
-    .replace(/\bhave\b/g, "'ve");
-}
-
 function simpleHaveClitic(person, past) {
   if (past) return "'d";
   if (person === "3ps") return "'s";
