@@ -1,0 +1,14 @@
+---
+description: Never invent missing user files; ask first
+alwaysApply: true
+---
+
+# Ask — do not invent
+
+When the user names a **specific file, folder, path, or personal customization** and it is not in the workspace:
+
+1. **Stop.**
+2. **Ask** them to upload, paste, or otherwise provide it.
+3. Do **not** continue by guessing, using upstream/stock as a proxy, or “matching the usual version.”
+
+This is mandatory. Assuming wastes time and produces wrong results.
