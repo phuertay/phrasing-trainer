@@ -91,20 +91,116 @@ const simplePronouns = [
 ];
 
 const fullStarters = [
-  { stroke: "SWR", word: "I", form: "am" },
-  { stroke: "KPWR", word: "you", form: "are" },
-  { stroke: "KWHR", word: "he", form: "is" },
-  { stroke: "SKWHR", word: "she", form: "is" },
-  { stroke: "KPWH", word: "it", form: "is" },
-  { stroke: "TWR", word: "we", form: "are" },
-  { stroke: "TWH", word: "they", form: "are" },
-  { stroke: "STKH", word: "this", form: "is" },
-  { stroke: "STWH", word: "that", form: "is" },
-  { stroke: "STHR", word: "there", form: "is" },
-  { stroke: "STPHR", word: "there", form: "are" },
-  { stroke: "STKPWHR", word: "", form: "is" },
-  { stroke: "STWR", word: "", form: "are" },
+  { stroke: "SWR", word: "I", form: "am", person: "1ps" },
+  { stroke: "KPWR", word: "you", form: "are", person: "2p" },
+  { stroke: "KWHR", word: "he", form: "is", person: "3ps" },
+  { stroke: "SKWHR", word: "she", form: "is", person: "3ps" },
+  { stroke: "KPWH", word: "it", form: "is", person: "3ps" },
+  { stroke: "TWR", word: "we", form: "are", person: "1pp" },
+  { stroke: "TWH", word: "they", form: "are", person: "3pp" },
+  { stroke: "STKH", word: "this", form: "is", person: "3ps" },
+  { stroke: "STWH", word: "that", form: "is", person: "3ps" },
+  { stroke: "STHR", word: "there", form: "is", person: "3ps" },
+  { stroke: "STPHR", word: "there", form: "are", person: "3pp" },
+  { stroke: "STKPWHR", word: "", form: "is", person: "b3ps" },
+  { stroke: "STWR", word: "", form: "are", person: "b3pp" },
 ];
+
+// Alternate STRUCTURE_EXCEPTIONS from jeff-phrasing when contractions are enabled.
+// `!` is replaced with the starter word. `_` is the default/fallback person.
+const structureContractions = {
+  E: {
+    present: {
+      _: "! are",
+      "1ps": "!'m",
+      "2p": "!'re",
+      "3ps": "!'s",
+      b3ps: "! is",
+      "1pp": "!'re",
+      "3pp": "!'re",
+      b3pp: "! are",
+    },
+    past: { _: "! were", "1ps": "! was", "3ps": "! was" },
+    verb: "being",
+  },
+  "*E": {
+    present: {
+      _: "! are not",
+      "1ps": "!'m not",
+      "2p": "!'re not",
+      "3ps": "! isn't",
+      "1pp": "!'re not",
+      "3pp": "!'re not",
+      b3pp: "! are not",
+    },
+    past: { _: "! weren't", "1ps": "! wasn't", "3ps": "! wasn't" },
+    verb: "being",
+  },
+  F: {
+    present: {
+      _: "! have",
+      "1ps": "!'ve",
+      "2p": "!'ve",
+      "3ps": "!'s",
+      b3ps: "! has",
+      "1pp": "!'ve",
+      "3pp": "!'ve",
+      b3pp: "! have",
+    },
+    past: {
+      _: "! had",
+      "1ps": "!'d",
+      "2p": "!'d",
+      "3ps": "!'d",
+      "1pp": "!'d",
+      "3pp": "!'d",
+      b3pp: "! had",
+    },
+    verb: "been",
+  },
+  "*F": {
+    present: { _: "! haven't", "3ps": "! hasn't" },
+    past: "! hadn't",
+    verb: "been",
+  },
+  EF: {
+    present: {
+      _: "! have been",
+      "1ps": "!'ve been",
+      "2p": "!'ve been",
+      "3ps": "!'s been",
+      b3ps: "! has been",
+      "1pp": "!'ve been",
+      "3pp": "!'ve been",
+      b3pp: "! have been",
+    },
+    past: {
+      _: "! had been",
+      "1ps": "!'d been",
+      "2p": "!'d been",
+      "3ps": "!'d been",
+      b3ps: "! had been",
+      "1pp": "!'d been",
+      "3pp": "!'d been",
+      b3pp: "! had been",
+    },
+    verb: "being",
+  },
+  "*EF": {
+    present: { _: "! haven't been", "3ps": "! hasn't been" },
+    past: "! hadn't been",
+    verb: "being",
+  },
+};
+
+function personLookup(data, person) {
+  if (typeof data === "string") return data;
+  if (data[person] !== undefined) return data[person];
+  if (person.startsWith("b") && data[person.slice(1)] !== undefined) {
+    return data[person.slice(1)];
+  }
+  return data._;
+}
 
 const auxiliaries = [
   {
@@ -234,7 +330,27 @@ function makeSimple(starter, pronoun, have, verb, past, suffix) {
   return [stroke, starter.word + " " + pronoun.word + " " + vp];
 }
 
-function makeFull(starter, aux, structure, verb, past, hasSuffix) {
+function makeFull(starter, aux, structure, verb, past, hasSuffix, useContractions) {
+  const stroke = (
+    starter.stroke +
+    aux.stroke +
+    "-" +
+    structure.stroke +
+    verbStroke(verb, past, hasSuffix)
+  ).replace(/(?<=[AO])-|-(?=[*EU])/, "");
+
+  // jeff-phrasing contracted STRUCTURE_EXCEPTIONS (empty middle only).
+  const contraction = useContractions && !aux.stroke && structureContractions[structure.stroke];
+  if (contraction) {
+    const tense = past ? "past" : "present";
+    const phrase = personLookup(contraction[tense], starter.person).replaceAll(
+      "!",
+      starter.word
+    );
+    const vp = conjugate(verb, contraction.verb, false, false);
+    return [stroke, phrase + " " + vp];
+  }
+
   const does = conjugate(DO, starter.form, past, false);
   const has = conjugate(HAVE, starter.form, past, false);
   const is = conjugate(BE, starter.form, past, false);
@@ -253,13 +369,6 @@ function makeFull(starter, aux, structure, verb, past, hasSuffix) {
     .replace("GONE", conjugate(verb, "been", false, false))
     .replace("GOES", conjugate(verb, starter.form, past, hasSuffix))
     .replace("GO", conjugate(verb, "be", false, false));
-  const stroke = (
-    starter.stroke +
-    aux.stroke +
-    "-" +
-    structure.stroke +
-    verbStroke(verb, past, hasSuffix)
-  ).replace(/(?<=[AO])-|-(?=[*EU])/, "");
   return [stroke, s];
 }
 
@@ -339,8 +448,9 @@ function generatePrompt() {
     return ["", "(No phrases available.)"];
   }
   const isFull = simple && full ? coin() : full;
+  const useContractions = on("o-contractions");
   const [stroke, phrase] = isFull
-    ? makeFull(pick(fs), pick(fa), pick(fst), pick(v), past, suffix)
+    ? makeFull(pick(fs), pick(fa), pick(fst), pick(v), past, suffix, useContractions)
     : makeSimple(pick(ss), pick(sp), have, pick(v), past, suffix);
   return [stroke, phrase];
 }
@@ -430,4 +540,8 @@ for (const i of [...document.querySelectorAll("input")]) {
       showHint();
     }
   });
+}
+
+for (const name of ["o-contractions", "s-have", "v-suffix", "v-past"]) {
+  document.getElementsByName(name)[0]?.addEventListener("change", nextPrompt);
 }
