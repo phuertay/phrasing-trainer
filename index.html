@@ -19,6 +19,19 @@
       <details open>
         <summary><h2>Settings</h2></summary>
         <div class="settings-box" style="padding: 1em">
+          <div class="contractions">
+            Use contractions:
+            <input
+              checked
+              type="radio"
+              id="c-off"
+              name="contractions"
+              value="off"
+            />
+            <label for="c-off">Off</label>
+            <input type="radio" id="c-on" name="contractions" value="on" />
+            <label for="c-on">On</label>
+          </div>
           <div class="presets">Presets:&nbsp;</div>
           <div class="hints">
             Hints: <input type="radio" id="h-off" name="hints" value="off" />
@@ -67,18 +80,6 @@
             <p class="full-starters">Starters:&nbsp;</p>
             <p class="full-auxiliaries">Auxiliaries:&nbsp;</p>
             <p class="full-structures">Structures:&nbsp;</p>
-            <p class="full-options">
-              Options:
-              <input
-                type="checkbox"
-                id="o-contractions"
-                name="o-contractions"
-              /><label
-                for="o-contractions"
-                title="Match jeff-phrasing contracted forms (I'm, I've, he's, …)"
-                >Use all contractions</label
-              >
-            </p>
           </div>
           <div class="settings-box">
             <div class="setting-top">
