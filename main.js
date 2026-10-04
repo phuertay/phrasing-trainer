@@ -81,13 +81,13 @@ const simpleStarters = [
 ];
 
 const simplePronouns = [
-  { stroke: "EU", word: "I", form: "am" },
-  { stroke: "*EU", word: "we", form: "are" },
-  { stroke: "E", word: "he", form: "is" },
-  { stroke: "*E", word: "she", form: "is" },
-  { stroke: "U", word: "you", form: "are" },
-  { stroke: "*U", word: "they", form: "are" },
-  { stroke: "*", word: "it", form: "is" },
+  { stroke: "EU", word: "I", form: "am", person: "1ps" },
+  { stroke: "*EU", word: "we", form: "are", person: "1pp" },
+  { stroke: "E", word: "he", form: "is", person: "3ps" },
+  { stroke: "*E", word: "she", form: "is", person: "3ps" },
+  { stroke: "U", word: "you", form: "are", person: "2p" },
+  { stroke: "*U", word: "they", form: "are", person: "3pp" },
+  { stroke: "*", word: "it", form: "is", person: "3ps" },
 ];
 
 const fullStarters = [
@@ -108,7 +108,7 @@ const fullStarters = [
 
 // jeff-phrasing STRUCTURE_EXCEPTIONS for empty-middle be/have forms.
 // `!` is replaced with the starter word. `_` is the default/fallback person.
-// "contracted" matches the optional I'm/I've block; "plain" is the default.
+// "contracted" matches phuertay's jeff-phrasing-contracted.py (not stock uncomment).
 const structureExceptions = {
   plain: {
     E: {
@@ -158,14 +158,16 @@ const structureExceptions = {
       verb: "being",
     },
     "*E": {
+      // "he's not"; blank → isn't/aren't; "this" forced to isn't in makeFull.
       present: {
         _: "! are not",
         "1ps": "!'m not",
         "2p": "!'re not",
-        "3ps": "! isn't",
+        "3ps": "!'s not",
         "1pp": "!'re not",
         "3pp": "!'re not",
-        b3pp: "! are not",
+        b3ps: "! isn't",
+        b3pp: "! aren't",
       },
       past: { _: "! weren't", "1ps": "! wasn't", "3ps": "! wasn't" },
       verb: "being",
@@ -188,6 +190,7 @@ const structureExceptions = {
         "3ps": "!'d",
         "1pp": "!'d",
         "3pp": "!'d",
+        b3ps: "! had",
         b3pp: "! had",
       },
       verb: "been",
@@ -228,6 +231,39 @@ const structureExceptions = {
   },
 };
 
+// From jeff-phrasing-contracted.py lookup() clitics.
+const ENDING_CLITIC = {
+  am: "'m",
+  "am a": "'m a",
+  is: "'s",
+  "is a": "'s a",
+  are: "'re",
+  "are a": "'re a",
+  have: "'ve",
+  has: "'s",
+  had: "'d",
+  would: "'d",
+  will: "'ll",
+};
+const MIDDLE_CLITIC = {
+  would: "'d",
+  will: "'ll",
+  "shall not": "shan't",
+};
+const VE_AFTER = new Set([
+  "could",
+  "couldn't",
+  "should",
+  "shouldn't",
+  "would",
+  "'d",
+  "wouldn't",
+  "'ll",
+  "can't",
+  "shan't",
+  "won't",
+]);
+
 function personLookup(data, person) {
   if (typeof data === "string") return data;
   if (data[person] !== undefined) return data[person];
@@ -235,6 +271,12 @@ function personLookup(data, person) {
     return data[person.slice(1)];
   }
   return data._;
+}
+
+function simpleHaveClitic(person, past) {
+  if (past) return "'d";
+  if (person === "3ps") return "'s";
+  return "'ve";
 }
 
 const auxiliaries = [
@@ -349,12 +391,35 @@ function conjugate(verb, form, past, hasSuffix) {
   return total.replaceAll("_", " ");
 }
 
-function makeSimple(starter, pronoun, have, verb, past, suffix) {
-  const vp = have
-    ? conjugate(HAVE, pronoun.form, past, false) +
-      " " +
-      conjugate(verb, "been", false, suffix)
-    : conjugate(verb, pronoun.form, past, suffix);
+function makeSimple(starter, pronoun, have, verb, past, suffix, useContractions) {
+  let phrase;
+  if (have) {
+    if (useContractions) {
+      phrase =
+        starter.word +
+        " " +
+        pronoun.word +
+        simpleHaveClitic(pronoun.person, past) +
+        " " +
+        conjugate(verb, "been", false, suffix);
+    } else {
+      phrase =
+        starter.word +
+        " " +
+        pronoun.word +
+        " " +
+        conjugate(HAVE, pronoun.form, past, false) +
+        " " +
+        conjugate(verb, "been", false, suffix);
+    }
+  } else {
+    let ending = conjugate(verb, pronoun.form, past, suffix);
+    if (useContractions && ENDING_CLITIC[ending] !== undefined) {
+      phrase = starter.word + " " + pronoun.word + ENDING_CLITIC[ending];
+    } else {
+      phrase = starter.word + " " + pronoun.word + " " + ending;
+    }
+  }
   const stroke = (
     starter.stroke +
     "-" +
@@ -362,7 +427,7 @@ function makeSimple(starter, pronoun, have, verb, past, suffix) {
     (have ? "F" : "") +
     verbStroke(verb, past, suffix)
   ).replace(/(?<=[AO])-|-(?=[*EU])/, "");
-  return [stroke, starter.word + " " + pronoun.word + " " + vp];
+  return [stroke, phrase];
 }
 
 function makeFull(starter, aux, structure, verb, past, hasSuffix, useContractions) {
@@ -380,10 +445,12 @@ function makeFull(starter, aux, structure, verb, past, hasSuffix, useContraction
   const exception = !aux.stroke && exceptions[structure.stroke];
   if (exception) {
     const tense = past ? "past" : "present";
-    const phrase = personLookup(exception[tense], starter.person).replaceAll(
-      "!",
-      starter.word
-    );
+    let fmt = personLookup(exception[tense], starter.person);
+    // jeff-phrasing-contracted: "this isn't" not "this's not"
+    if (useContractions && starter.word === "this" && fmt === "!'s not") {
+      fmt = "! isn't";
+    }
+    const phrase = fmt.replaceAll("!", starter.word);
     const vp = conjugate(verb, exception.verb, false, false);
     return [stroke, phrase + " " + vp];
   }
@@ -392,9 +459,24 @@ function makeFull(starter, aux, structure, verb, past, hasSuffix, useContraction
   const has = conjugate(HAVE, starter.form, past, false);
   const is = conjugate(BE, starter.form, past, false);
   const have = conjugate(HAVE, "be", false, false);
-  const can = conjugate(aux.positive, starter.form, past, false);
-  const cant = conjugate(aux.negative, starter.form, past, false);
-  const s = (aux.stroke ? structure.can : structure.do)
+  let can = conjugate(aux.positive, starter.form, past, false);
+  let cant = conjugate(aux.negative, starter.form, past, false);
+  const isQuestion = structure.stroke === "U" || structure.stroke === "*U";
+  const usingCanTemplate = !!aux.stroke;
+  let template = usingCanTemplate ? structure.can : structure.do;
+
+  // jeff-phrasing-contracted middle clitics (will→'ll, would→'d, shall not→shan't).
+  // Question order ("will he") keeps full words; 'll/'d only glue on !* layouts.
+  if (useContractions && usingCanTemplate) {
+    const gluePos = MIDDLE_CLITIC[can];
+    const glueNeg = MIDDLE_CLITIC[cant];
+    const canGlue = (glued) =>
+      glued && !(glued.startsWith("'") && isQuestion);
+    if (canGlue(gluePos)) can = gluePos;
+    if (canGlue(glueNeg)) cant = glueNeg;
+  }
+
+  let s = template
     .replace("HE", starter.word)
     .replace("DOES", does)
     .replace("IS", is)
@@ -406,6 +488,38 @@ function makeFull(starter, aux, structure, verb, past, hasSuffix, useContraction
     .replace("GONE", conjugate(verb, "been", false, false))
     .replace("GOES", conjugate(verb, starter.form, past, hasSuffix))
     .replace("GO", conjugate(verb, "be", false, false));
+
+  // Modal + have → 've ("could've", "I'll've", "won't've") when contracted.
+  if (useContractions && usingCanTemplate) {
+    const modalWord = template.includes("CAN'T") ? cant : can;
+    if (VE_AFTER.has(modalWord) && /\bhave\b/.test(s)) {
+      const esc = modalWord.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      s = s.replace(new RegExp(`(${esc}) have been\\b`), "$1've been");
+      s = s.replace(new RegExp(`(${esc}) have\\b`), "$1've");
+    }
+  }
+
+  // Empty-structure ending clitics: "I am"→"I'm", "I will"→"I'll", …
+  if (
+    useContractions &&
+    !aux.stroke &&
+    structure.stroke === "" &&
+    starter.word
+  ) {
+    const prefix = starter.word + " ";
+    if (s.startsWith(prefix)) {
+      const ending = s.slice(prefix.length);
+      if (ENDING_CLITIC[ending] !== undefined) {
+        s = starter.word + ENDING_CLITIC[ending];
+      }
+    }
+  }
+
+  // "I'll go": template leaves a space before 'll/'d ("I 'll go").
+  if (useContractions && starter.word) {
+    s = s.replace(new RegExp(`^(${starter.word}) '(ll|d)\\b`), "$1'$2");
+  }
+
   return [stroke, s];
 }
 
@@ -488,7 +602,7 @@ function generatePrompt() {
   const useContractions = !!document.querySelector("#c-on:checked");
   const [stroke, phrase] = isFull
     ? makeFull(pick(fs), pick(fa), pick(fst), pick(v), past, suffix, useContractions)
-    : makeSimple(pick(ss), pick(sp), have, pick(v), past, suffix);
+    : makeSimple(pick(ss), pick(sp), have, pick(v), past, suffix, useContractions);
   return [stroke, phrase];
 }
 
