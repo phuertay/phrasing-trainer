@@ -362,7 +362,7 @@ const presets = [
       auxiliaries.map((x) => "fa-" + x.stroke).join(" ") +
       " " +
       structures.map((x) => "fst-" + x.stroke).join(" ") +
-      " v-suffix v-past v-G",
+      " v-G",
   },
   {
     name: "I + verbs",
