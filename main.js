@@ -333,7 +333,7 @@ const presets = [
       "fs-SWR fs-KPWR fs-KWHR fs-SKWHR fs-TWH fs-TWR fs-KPWH fa- fst- fst-* v-G",
   },
   {
-    name: "Full Simple (only go)",
+    name: "Simple",
     options:
       simpleStarters.map((x) => "ss-" + x.stroke).join(" ") +
       " " +
@@ -341,7 +341,7 @@ const presets = [
       " s-have v-G",
   },
   {
-    name: "Full Full (only go)",
+    name: "Full",
     options:
       fullStarters.map((x) => "fs-" + x.stroke).join(" ") +
       " " +
