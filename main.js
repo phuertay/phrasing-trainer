@@ -348,7 +348,7 @@ const presets = [
       auxiliaries.map((x) => "fa-" + x.stroke).join(" ") +
       " " +
       structures.map((x) => "fst-" + x.stroke).join(" ") +
-      " v-G",
+      " s-have v-G",
   },
   {
     name: "All + go",
