@@ -333,9 +333,34 @@ const presets = [
       "fs-SWR fs-KPWR fs-KWHR fs-SKWHR fs-TWH fs-TWR fs-KPWH fa- fst- fst-* v-G",
   },
   {
-    name: "Lapwing",
+    name: "Full Simple (only go)",
     options:
-      "fs-SWR fs-KWHR fs-SKWHR fs-TWH fs-TWR fs-KPWH fa- fa-A fa-O fa-AO fst- fst-* v-G v-PBLG v-P v-RPG v-past",
+      fullStarters.map((x) => "fs-" + x.stroke).join(" ") +
+      " fa- fst- fst-* v-G",
+  },
+  {
+    name: "Full Full (only go)",
+    options:
+      fullStarters.map((x) => "fs-" + x.stroke).join(" ") +
+      " " +
+      auxiliaries.map((x) => "fa-" + x.stroke).join(" ") +
+      " " +
+      structures.map((x) => "fst-" + x.stroke).join(" ") +
+      " v-G",
+  },
+  {
+    name: "All + go",
+    options:
+      simpleStarters.map((x) => "ss-" + x.stroke).join(" ") +
+      " " +
+      simplePronouns.map((x) => "sp-" + x.stroke).join(" ") +
+      " s-have " +
+      fullStarters.map((x) => "fs-" + x.stroke).join(" ") +
+      " " +
+      auxiliaries.map((x) => "fa-" + x.stroke).join(" ") +
+      " " +
+      structures.map((x) => "fst-" + x.stroke).join(" ") +
+      " v-suffix v-past v-G",
   },
   {
     name: "I + verbs",
