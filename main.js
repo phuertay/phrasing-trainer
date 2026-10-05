@@ -335,8 +335,10 @@ const presets = [
   {
     name: "Full Simple (only go)",
     options:
-      fullStarters.map((x) => "fs-" + x.stroke).join(" ") +
-      " fa- fst- fst-* v-G",
+      simpleStarters.map((x) => "ss-" + x.stroke).join(" ") +
+      " " +
+      simplePronouns.map((x) => "sp-" + x.stroke).join(" ") +
+      " s-have v-G",
   },
   {
     name: "Full Full (only go)",
