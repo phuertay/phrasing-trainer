@@ -367,7 +367,7 @@ const presets = [
   {
     name: "I + verbs",
     options:
-      "fs-SWR fa-SWR fa- fst- " +
+      "fs-SWR fa-SWR fa- fst- v-suffix v-past " +
       verbData.map((v) => "v-" + v.split(" ")[0]).join(" "),
   },
 ];
